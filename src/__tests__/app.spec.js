@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render } from "@testing-library/react";
 
 import App from "../App";
 
@@ -12,8 +12,8 @@ let response = {
 };
 
 describe("App tests", () => {
-  beforeEach(cleanup);
   describe("When loading succeed", () => {
+    let screen;
     let fetchRepos;
 
     beforeEach(() => {
@@ -22,8 +22,10 @@ describe("App tests", () => {
       };
       fetchRepos = props.fetchRepos;
       fetchRepos.mockResolvedValue(response);
-      render(<App {...props} />);
+      screen = render(<App {...props} />);
     });
+
+    afterEach(cleanup);
 
     it("invoke fetchRepose", () => {
       expect(fetchRepos).toBeCalled();
@@ -41,35 +43,22 @@ describe("App tests", () => {
       expect(screen.queryByText("552")).not.toBeNull();
     });
   });
-  describe("When loading failed", () => {
-    let fetchRepos;
 
-    beforeEach(() => {
-      const props = {
-        fetchRepos: jest.fn(),
-      };
-      fetchRepos = props.fetchRepos;
-      fetchRepos.mockRejectedValue(new Error("Async error"));
-      return render(<App {...props} />);
-    });
-
-    it("invoke fetchRepose", () => {
-      expect(fetchRepos).toBeCalledTimes(1);
-    });
-
-    it("show error message", async () => {
-      const el = await screen.findByText("An error has occurred");
-      expect(el).not.toBeNull();
-    });
-  });
   describe("When loading pending", () => {
+    let screen;
     beforeEach(() => {
       const props = {
-        fetchRepos: new Promise(() => {}),
+        fetchRepos: new Promise(async (resolve, reject) => {
+          await setTimeout(() => {
+            resolve(response);
+          }, 1000);
+        }),
       };
 
-      render(<App {...props} />);
+      screen = render(<App {...props} />);
     });
+
+    afterEach(cleanup);
 
     it("show loading", async () => {
       const el = await screen.findByText("Loading...");
@@ -86,6 +75,31 @@ describe("App tests", () => {
       expect(screen.queryByText("144")).toBeNull();
       expect(screen.queryByText("14341")).toBeNull();
       expect(screen.queryByText("552")).toBeNull();
+    });
+  });
+
+  describe("When loading failed", () => {
+    let screen;
+    let fetchRepos;
+
+    beforeEach(() => {
+      const props = {
+        fetchRepos: jest.fn(),
+      };
+      fetchRepos = props.fetchRepos;
+      fetchRepos.mockRejectedValue(new Error("Async error"));
+      screen = render(<App {...props} />);
+    });
+
+    afterEach(cleanup);
+
+    it("invoke fetchRepose", () => {
+      expect(fetchRepos).toBeCalledTimes(1);
+    });
+
+    it("show error message", async () => {
+      const el = await screen.findByText("An error has occurred");
+      expect(el).not.toBeNull();
     });
   });
 });

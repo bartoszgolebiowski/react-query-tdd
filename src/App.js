@@ -1,11 +1,11 @@
 import { useQuery } from "react-query";
 
 function App({ fetchRepos }) {
-  const { data, isLoading, error } = useQuery("repoData", () => fetchRepos());
+  const { data, isLoading, isError } = useQuery("repoData", () => fetchRepos());
 
   if (isLoading) return "Loading...";
 
-  if (error || data === undefined) return "An error has occurred";
+  if (isError || data === undefined) return "An error has occurred";
 
   return (
     <div>
