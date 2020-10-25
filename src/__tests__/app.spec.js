@@ -1,4 +1,4 @@
-import { cleanup, render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 
 import App from "../App";
 
@@ -13,7 +13,6 @@ let response = {
 
 describe("App tests", () => {
   describe("When loading succeed", () => {
-    let screen;
     let fetchRepos;
 
     beforeEach(() => {
@@ -22,10 +21,8 @@ describe("App tests", () => {
       };
       fetchRepos = props.fetchRepos;
       fetchRepos.mockResolvedValue(response);
-      screen = render(<App {...props} />);
+      render(<App {...props} />);
     });
-
-    afterEach(cleanup);
 
     it("invoke fetchRepose", () => {
       expect(fetchRepos).toBeCalled();
@@ -45,7 +42,6 @@ describe("App tests", () => {
   });
 
   describe("When loading pending", () => {
-    let screen;
     beforeEach(() => {
       const props = {
         fetchRepos: new Promise(async (resolve, reject) => {
@@ -55,10 +51,8 @@ describe("App tests", () => {
         }),
       };
 
-      screen = render(<App {...props} />);
+      render(<App {...props} />);
     });
-
-    afterEach(cleanup);
 
     it("show loading", async () => {
       const el = await screen.findByText("Loading...");
@@ -79,7 +73,6 @@ describe("App tests", () => {
   });
 
   describe("When loading failed", () => {
-    let screen;
     let fetchRepos;
 
     beforeEach(() => {
@@ -88,10 +81,8 @@ describe("App tests", () => {
       };
       fetchRepos = props.fetchRepos;
       fetchRepos.mockRejectedValue(new Error("Async error"));
-      screen = render(<App {...props} />);
+      render(<App {...props} />);
     });
-
-    afterEach(cleanup);
 
     it("invoke fetchRepose", () => {
       expect(fetchRepos).toBeCalledTimes(1);
