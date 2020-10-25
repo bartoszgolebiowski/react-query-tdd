@@ -5,7 +5,7 @@ function App({ fetchRepos }) {
 
   if (isLoading) return "Loading...";
 
-  if (error) return "An error has occurred";
+  if (error || data === undefined) return "An error has occurred";
 
   return (
     <div>

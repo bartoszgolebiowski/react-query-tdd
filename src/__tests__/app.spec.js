@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 
 import App from "../App";
 
@@ -12,6 +12,7 @@ let response = {
 };
 
 describe("App tests", () => {
+  beforeEach(cleanup);
   describe("When loading succeed", () => {
     let fetchRepos;
 
@@ -29,15 +30,15 @@ describe("App tests", () => {
     });
 
     it("display record", () => {
-      expect(screen.getByText("react-query")).not.toBeNull();
+      expect(screen.queryByText("react-query")).not.toBeNull();
       expect(
-        screen.getByText(
+        screen.queryByText(
           "Hooks for fetching, caching and updating asynchronous data in React"
         )
       ).not.toBeNull();
-      expect(screen.getByText("144")).not.toBeNull();
-      expect(screen.getByText("14341")).not.toBeNull();
-      expect(screen.getByText("552")).not.toBeNull();
+      expect(screen.queryByText("144")).not.toBeNull();
+      expect(screen.queryByText("14341")).not.toBeNull();
+      expect(screen.queryByText("552")).not.toBeNull();
     });
   });
   describe("When loading failed", () => {
@@ -57,7 +58,34 @@ describe("App tests", () => {
     });
 
     it("show error message", async () => {
-      expect(screen.getByText("An error has occurred")).not.toBeNull();
+      const el = await screen.findByText("An error has occurred");
+      expect(el).not.toBeNull();
+    });
+  });
+  describe("When loading pending", () => {
+    beforeEach(() => {
+      const props = {
+        fetchRepos: new Promise(() => {}),
+      };
+
+      render(<App {...props} />);
+    });
+
+    it("show loading", async () => {
+      const el = await screen.findByText("Loading...");
+      expect(el).not.toBeNull();
+    });
+
+    it("not display record", () => {
+      expect(screen.queryByText("react-query")).toBeNull();
+      expect(
+        screen.queryByText(
+          "Hooks for fetching, caching and updating asynchronous data in React"
+        )
+      ).toBeNull();
+      expect(screen.queryByText("144")).toBeNull();
+      expect(screen.queryByText("14341")).toBeNull();
+      expect(screen.queryByText("552")).toBeNull();
     });
   });
 });
